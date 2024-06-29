@@ -10,6 +10,10 @@ export default function MainContent({ content, mdContent }) {
   const [selectedTab, setSelectedTab] = useState('Article');
 
   const renderTabContent = () => {
+    if (typeof window === 'undefined') {
+      return null; // Prevents rendering on the server side
+    }
+    
     switch (selectedTab) {
       case 'Article':
         return <ArticleTab content={content} />;

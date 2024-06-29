@@ -1,11 +1,9 @@
-import Header from '../../components/Header'
-import Sidebar from '../../components/Sidebar'
-import MainContent from '../../components/MainContent'
-import Footer from '../../components/Footer'
+import Sidebar from '../../../components/Sidebar'
+import MainContent from '../../../components/MainContent'
 import fs from 'fs'
 import path from 'path'
 import matter from 'gray-matter'
-import { parseMarkdown } from '../../utils/parseMarkdown'
+import { parseMarkdown } from '../../../utils/parseMarkdown'
 
 async function fetchMarkdownContent(id) {
   const filePath = path.join(process.cwd(), 'articles', `${id}.md`)

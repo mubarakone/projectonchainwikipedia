@@ -1,12 +1,8 @@
 'use client'
 import { useState, useEffect } from 'react';
 import Link from 'next/link'
-import dynamic from 'next/dynamic';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import 'react-mde/lib/styles/css/react-mde-all.css';
-
-const ReactMde = dynamic(() => import('react-mde'), { ssr: false });
+import SimpleMDE from 'react-simplemde-editor';
+import 'easymde/dist/easymde.min.css';
 
 export default function EditTab({ content }) {
   const [value, setValue] = useState('');
@@ -42,17 +38,12 @@ export default function EditTab({ content }) {
     return (
       <div className="container mx-auto">
         <div className="relative">
-          <ReactMde
+          <SimpleMDE
             value={value}
             onChange={setValue}
-            selectedTab={selectedTab}
-            onTabChange={setSelectedTab}
-            generateMarkdownPreview={markdown => Promise.resolve(<ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>)}
-            readOnly={!isEditable}
-            childProps={{
-              writeButton: {
-                tabIndex: -1
-              }
+            options={{
+              spellChecker: false,
+              readOnly: !isEditable,
             }}
           />
           {!isEditable && (
