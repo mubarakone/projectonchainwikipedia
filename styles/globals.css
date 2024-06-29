@@ -1,0 +1,439 @@
+/* globals.css */
+
+/* Reset and base styles */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+    margin: 0px;
+    padding: 0px;
+    font-family: sans-serif;
+    font-size: 1vw;
+}
+
+a {
+    text-decoration: none;
+    color: blue;
+    font-size: 1vw;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.body {
+    box-sizing: border-box;
+    height: 100%;
+    width: 90vw;
+    margin: auto;
+}
+
+/* Header styles */
+.top {
+    box-sizing: border-box;
+    height: auto;
+    width: auto;
+    padding: 5px 0px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.top-left {
+    box-sizing: border-box;
+    height: auto;
+    width: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.triple-bar {
+    height: 100%;
+    width: 2vw;
+}
+
+#triple-bar-icon {
+    height: 100%;
+    width: 100%;
+}
+
+.wikipedia-logo {
+    height: 100%;
+    width: 13vw;
+}
+
+#wikipedia-logo-icon {
+    height: 100%;
+    width: 100%;
+}
+
+.top-centre {
+    box-sizing: border-box;
+    height: auto;
+    width: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-box {
+    border: 1px solid gray;
+    height: 2.5rem;
+    width: 40vw;
+    display: flex;
+}
+
+#search-logo {
+    height: auto;
+    width: auto;
+    margin: 0.5rem;
+}
+
+#search-bar {
+    border: none;
+    height: 100%;
+    width: 80%;
+    font-size: 1vw;
+    padding: 0px 5px;
+}
+
+#search-btn {
+    border: none;
+    border-left: 1px solid gray;
+    height: 100%;
+    width: 6vw;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.top-right {
+    box-sizing: border-box;
+    height: auto;
+    width: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+#three-dots {
+    height: 100%;
+    width: 1.5vw;
+}
+
+/* Sidebar styles */
+.middle {
+    box-sizing: border-box;
+    display: flex;
+    height: auto;
+    width: auto;
+}
+
+.side-bar {
+    box-sizing: border-box;
+    height: fit-content;
+    width: 20vw;
+    margin-top: 5rem;
+    padding: 1vh;
+    position: sticky;
+    top: 5rem; /* Adjust this value to account for your header height */
+}
+
+.side-bar h1 {
+    line-height: 2.5em;
+    border-bottom: 1px solid rgb(230, 230, 230);
+    margin-bottom: 1rem;
+}
+
+#shortcuts {
+    margin-top: 1rem;
+    list-style-type: none;
+    padding-left: 0;
+}
+
+#shortcuts a {
+    display: block;
+    padding: 0.5rem 0;
+    color: blue;
+    font-size: 1vw;
+    text-decoration: none;
+}
+
+#shortcuts a:hover {
+    text-decoration: underline;
+}
+
+/* Main body styles */
+.main-body {
+    box-sizing: border-box;
+    height: auto;
+    width: 80vw;
+    padding-top: 2.5rem;
+    padding-left: 2rem;
+}
+
+.main-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#title {
+    font-size: 2.5vw;
+    font-weight: normal;
+    font-family: 'Times New Roman';
+}
+
+#page-translate {
+    display: flex;
+    align-items: center;
+    font-weight: 900;
+    gap: 0.5vw;
+}
+
+#translate {
+    height: 1.5rem;
+    width: auto;
+}
+
+.sub-title {
+    height: auto;
+    width: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    line-height: 2.5rem;
+}
+
+.sub-title-1 {
+    height: auto;
+    width: auto;
+    display: flex;
+    align-items: center;
+    gap: 1vw;
+}
+
+.sub-title-2 {
+    height: auto;
+    width: auto;
+    display: flex;
+    align-items: center;
+    gap: 1vw;
+}
+
+.article-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+.article {
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    line-height: 2rem;
+    overflow: hidden; /* Ensure proper wrapping */
+}
+
+.article ul {
+    padding-left: 2vw;
+}
+
+.article sup {
+    font-size: 1px;
+}
+
+.from-wikipedia {
+    height: auto;
+    width: 100%;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.info-box {
+    border: 1px solid gray;
+    box-sizing: border-box;
+    height: fit-content;
+    width: 20vw;
+    padding: 0.5rem;
+    float: right; /* Float the info-box to the right */
+    margin-bottom: 1rem; /* Add some space below the info-box */
+    margin-left: 1rem; /* Add some space to the left of the info-box */
+}
+
+.profile-photo-box {
+    box-sizing: border-box;
+    text-align: center;
+    height: auto;
+    width: auto;
+}
+
+.profile {
+    height: auto;
+    width: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#profile-photo {
+    height: 100%;
+    width: 100%;
+}
+
+.details {
+    box-sizing: border-box;
+    height: auto;
+    width: auto;
+    display: flex;
+    gap: 5px;
+}
+
+#ques {
+    box-sizing: border-box;
+    height: auto;
+    width: 10rem;
+    text-align: start;
+    line-height: 2rem;
+    font-weight: bold;
+}
+
+#ans {
+    box-sizing: border-box;
+    height: auto;
+    width: 15rem;
+    text-align: start;
+    line-height: 2rem;
+}
+
+.second-title {
+    font-size: 2vw;
+    line-height: 2.5rem;
+    font-weight: normal;
+    font-family: 'Times New Roman';
+    margin-top: 2rem;
+    position: relative;
+    display: grid; /* Ensure grid display for proper wrapping */
+    grid-template-columns: 1fr; /* Single column layout */
+}
+
+.second-title::after {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 1px;
+    background: #ccc;
+    margin-top: 0.5rem;
+}
+
+.bottom {
+    margin-top: 40px;
+    padding-top: 10px;
+    padding-bottom: 40px;
+    border-top: 1px solid #a2a9b1;
+    font-size: 0.75em;
+    line-height: 1.6em;
+    color: #54595d;
+}
+
+.bottom a {
+    color: blue;
+    text-decoration: none;
+    font-size: 1em;
+}
+
+.bottom a:hover {
+    text-decoration: underline;
+}
+
+.bottom p {
+    font-size: 1em;
+}
+
+.last-anchor-line {
+    height: 5vh;
+    width: auto;
+    display: flex;
+    justify-content: space-between;
+}
+
+.last-anchor {
+    display: flex;
+    gap: 2rem;
+}
+
+#last-anchor {
+    font-size: 1rem;
+}
+
+.last-anchor-icons {
+    height: 2.2rem;
+    width: 13rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.last-anchor-icon-1 {
+    height: 100%;
+    width: auto;
+}
+
+.last-anchor-icon-2 {
+    height: 100%;
+    width: auto;
+}
+
+#wikimedia {
+    height: 100%;
+    width: 100%;
+}
+
+#mediawiki {
+    height: 100%;
+    width: 100%;
+}
+
+/* Specific styling for the custom heading */
+.custom-heading {
+    font-family: 'Times New Roman', serif;
+    font-weight: normal;
+    font-size: 2vw;
+    margin-top: 2rem;
+    display: grid; /* Ensure grid display for proper wrapping */
+    grid-template-columns: 1fr; /* Single column layout */
+}
+
+.heading-divider {
+    width: 100%;
+    height: 1px;
+    background: #ccc;
+    margin-top: 0.5rem;
+}
+
+.sub-title-1 span, .sub-title-2 span {
+    cursor: pointer;
+    color: blue;
+    text-decoration: none;
+}
+
+.sub-title-1 span:hover, .sub-title-2 span:hover {
+    text-decoration: underline;
+}
+
+.active-tab {
+    font-weight: bold;
+    color: black !important;
+    border-bottom: 3px solid black; /* Bold underline */
+}
+
+
+
