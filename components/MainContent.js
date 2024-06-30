@@ -1,19 +1,28 @@
 'use client'
-
-import { useState } from 'react';
+import dynamic from 'next/dynamic';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import ArticleTab from './ArticleTab';
-import TalkTab from './TalkTab';
-import EditTab from './EditTab';
+
+const ArticleTab = dynamic(() => import('./ArticleTab'), { ssr: false });
+const TalkTab = dynamic(() => import('./TalkTab'), { ssr: false });
+const EditTab = dynamic(() => import('./EditTab'), { ssr: false });
 
 export default function MainContent({ content, mdContent }) {
   const [selectedTab, setSelectedTab] = useState('Article');
+
+  useEffect(() => {
+    if (typeof navigator !== 'undefined') {
+      console.log('Navigator is available:', navigator.userAgent);
+    } else {
+      console.log('Navigator is not available');
+    }
+  }, []);
 
   const renderTabContent = () => {
     if (typeof window === 'undefined') {
       return null; // Prevents rendering on the server side
     }
-    
+
     switch (selectedTab) {
       case 'Article':
         return <ArticleTab content={content} />;
