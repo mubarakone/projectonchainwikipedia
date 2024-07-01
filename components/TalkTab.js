@@ -116,10 +116,22 @@ export default function TalkTab({ switchToEditTab }) {
                 </div>
                 {/* End Header */}
                 {selectedDraft ? (
-                  <div className="px-6 py-4">
-                    <p className="text-sm text-gray-600 dark:text-neutral-400"><strong>Description: </strong>{selectedDraftData.description}</p>
-                    <p className="text-sm text-gray-600 dark:text-neutral-400"><strong>Explanation: </strong>{selectedDraftData.explanation}</p>
+                <div className="px-6 py-4">
+                  <div className="border rounded-lg shadow-sm bg-white dark:bg-neutral-900 dark:border-neutral-700">
+                    <div className="bg-gray-100 dark:bg-neutral-800 p-2 rounded-t-lg">
+                      <strong className="block text-sm font-medium text-gray-600 dark:text-neutral-400">Description:</strong>
+                    </div>
+                    <div className="p-4 border-b dark:border-neutral-700">
+                      <p className="text-md text-gray-800 dark:text-neutral-200">{selectedDraftData.description}</p>
+                    </div>
+                    <div className="bg-gray-100 dark:bg-neutral-800 p-2 rounded-b-lg">
+                      <strong className="block text-sm font-medium text-gray-600 dark:text-neutral-400">Explanation:</strong>
+                    </div>
+                    <div className="p-4">
+                      <p className="text-md text-gray-800 dark:text-neutral-200">{selectedDraftData.explanation}</p>
+                    </div>
                   </div>
+                </div>                
                 ) : (
                   <table className="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
                     <thead className="bg-gray-50 dark:bg-neutral-800">
