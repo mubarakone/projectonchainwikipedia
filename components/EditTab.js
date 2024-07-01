@@ -1,59 +1,104 @@
 'use client'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Link from 'next/link'
 import SimpleMDE from 'react-simplemde-editor';
 import 'easymde/dist/easymde.min.css';
+import { useFirebase } from '../context/FirebaseContext'
+import { addDoc, collection } from 'firebase/firestore';
+import { ref, uploadString } from 'firebase/storage';
+
+const MarkdownEditor = ({ value, setValue, isEditable }) => {
+
+  const editorOptions = useMemo(() => ({
+    spellChecker: false,
+    readOnly: !isEditable,
+  }), [isEditable]);
+
+  return (
+    <div className="container mx-auto">
+      <div className="relative">
+        <SimpleMDE
+          value={value}
+          onChange={setValue}
+          options={editorOptions}
+        />
+        {!isEditable && (
+          <div className="absolute inset-0 bg-gray-100 bg-opacity-50 flex items-center justify-center pointer-events-auto">
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export default function EditTab({ content }) {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState(content);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [explaination, setExplaination] = useState('');
+  const [explanation, setExplanation] = useState('');
   const [isEditable, setIsEditable] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const { db, storage } = useFirebase();
+
+  const getButtonLabel = () => {
+    if (isLoading) return 'Saving...';
+    if (isSuccess) return 'Saved Successfully';
+    if (isError) return 'Save Failed';
+    return 'Save Draft';
+  };
+
+  const getButtonClass = () => {
+    if (isLoading) return 'bg-gray-500';
+    if (isSuccess) return 'bg-green-500';
+    if (isError) return 'bg-red-500';
+    return 'bg-blue-500 hover:bg-blue-600';
+  };
+
+  const handleEditorChange = useCallback((value) => {
+    setValue(value);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Send the markdown content to the draft page or server endpoint
-    const response = await fetch('../app/api/saveDraft', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ markdown: value, title, description, explaination }),
-    });
-    const data = await response.json();
-    if (data.success) {
-      // Redirect to the draft page with the draft ID
-      window.location.href = `../app/draft/${data.draftId}`;
-    }
-  };
+    setIsLoading(true);
+    setIsSuccess(false);
+    setIsError(false);
 
-  const MarkdownEditor = ({ initialContent }) => {
-    const [selectedTab, setSelectedTab] = useState('write');
-  
-    useEffect(() => {
-      setValue(initialContent);
-    }, [initialContent]);
-  
-    return (
-      <div className="container mx-auto">
-        <div className="relative">
-          <SimpleMDE
-            value={value}
-            onChange={setValue}
-            options={{
-              spellChecker: false,
-              readOnly: !isEditable,
-            }}
-          />
-          {!isEditable && (
-            <div className="absolute inset-0 bg-gray-100 bg-opacity-50 flex items-center justify-center pointer-events-auto">
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
+    const draftId = Date.now().toString();
+    const fileName = `${draftId}.md`;
+    const fileRef = ref(storage, fileName);
+
+    // Prepare data to be submitted
+    const dataToSubmit = {
+      title,
+      description,
+      explanation,
+    };
+
+    try {
+       // Only include markdown content if it has been edited
+      if (value !== content) {
+        await uploadString(fileRef, value);
+        dataToSubmit.fileName = fileName;
+      }
+
+      // Save metadata to Firestore
+      await addDoc(collection(db, 'drafts'), {
+        ...dataToSubmit,
+        createdAt: new Date(),
+      });
+
+      setIsSuccess(true);
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
+
+  }
 
     return (
       <form onSubmit={handleSubmit} className='relative py-1'>
@@ -90,7 +135,11 @@ export default function EditTab({ content }) {
           <div className="flex-1 py-2">
             <div className='max-w-full max-h-full py-2'>
               <label htmlFor="explanation-label" class="block text-lg font-semibold mb-2 dark:text-white">Explanation</label>
-              <textarea value={explaination} onChange={(e) => setExplaination(e.target.value)} id="explanation-label" class="py-3 px-4 bg-gray-100 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" rows="8" placeholder="Provide an in-depth explaination for your topic, or edit here..." required></textarea>
+              <SimpleMDE
+                value={explanation}
+                onChange={setExplanation}
+                placeholder='Provide your in-depth explanation for your topic, or edit...'
+              />
             </div>
           </div>
         </div>
@@ -106,11 +155,15 @@ export default function EditTab({ content }) {
           <label htmlFor="enableEditor" className="text-gray-700">
             Enable Editing
           </label>
-          <MarkdownEditor initialContent={content} />
+          <MarkdownEditor value={value} setValue={handleEditorChange} isEditable={isEditable} />
         </div>
         <div className='grid relative justify-items-end mt-3.5'>
-          <button type="submit" class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
-            Submit Draft
+          <button
+            type="submit"
+            className={`mt-4 px-4 py-2 text-white rounded ${getButtonClass()}`}
+            disabled={isLoading}
+          >
+            {getButtonLabel()}
           </button>
         </div>
       </form>
