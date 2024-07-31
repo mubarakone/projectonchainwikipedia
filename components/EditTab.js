@@ -6,6 +6,7 @@ import 'easymde/dist/easymde.min.css';
 import { useFirebase } from '../context/FirebaseContext'
 import { addDoc, collection } from 'firebase/firestore';
 import { ref, uploadString } from 'firebase/storage';
+import { useIsLoggedIn, useDynamicContext } from '@dynamic-labs/sdk-react-core'; 
 
 const MarkdownEditor = ({ value, setValue, isEditable }) => {
 
@@ -42,6 +43,9 @@ export default function EditTab({ content }) {
   const [isError, setIsError] = useState(false);
   const { db, storage } = useFirebase();
 
+  const { primaryWallet } = useDynamicContext();
+  const isLoggedIn = useIsLoggedIn();
+
   const getButtonLabel = () => {
     if (isLoading) return 'Saving...';
     if (isSuccess) return 'Saved Successfully';
@@ -75,6 +79,8 @@ export default function EditTab({ content }) {
       title,
       description,
       explanation,
+      address: primaryWallet?.address,
+      comments : [],
     };
 
     try {
@@ -102,25 +108,27 @@ export default function EditTab({ content }) {
 
     return (
       <form onSubmit={handleSubmit} className='relative py-1'>
-        <div class="bg-yellow-50 border border-yellow-200 text-sm text-yellow-800 rounded-lg p-4 dark:bg-yellow-800/10 dark:border-yellow-900 dark:text-yellow-500" role="alert">
-          <div class="flex">
-            <div class="flex-shrink-0">
-              <svg class="flex-shrink-0 size-4 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
-                <path d="M12 9v4"></path>
-                <path d="M12 17h.01"></path>
-              </svg>
-            </div>
-            <div class="ms-4">
-              <h3 class="text-sm text-red-700 font-semibold">
-                You are not logged in.
-              </h3>
-              <div class="mt-1 text-sm text-black">
-                Your IP address will be publicly visible if you make any edits. If you <Link className='text-sm text-semibold' href={"#"}>log in</Link> or <Link className='text-sm text-semibold' href={"#"}>create an account</Link>, your edits will be attributed to a username, among other <Link className='text-sm' href={"#"} >benefits</Link>.
+        {!isLoggedIn && (
+          <div class="bg-yellow-50 border border-yellow-200 text-sm text-yellow-800 rounded-lg p-4 dark:bg-yellow-800/10 dark:border-yellow-900 dark:text-yellow-500" role="alert">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="flex-shrink-0 size-4 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+                  <path d="M12 9v4"></path>
+                  <path d="M12 17h.01"></path>
+                </svg>
+              </div>
+              <div class="ms-4">
+                <h3 class="text-sm text-red-700 font-semibold">
+                  You are not logged in.
+                </h3>
+                <div class="mt-1 text-sm text-black">
+                  Your IP address will be publicly visible if you make any edits. If you <Link className='text-sm text-semibold' href={"#"}>log in</Link> or <Link className='text-sm text-semibold' href={"#"}>create an account</Link>, your edits will be attributed to a username, among other <Link className='text-sm' href={"#"} >benefits</Link>.
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
         <div className='flex flex-col md:flex-row md:space-x-4'>
           <div className="flex-1 py-2">
             <div class="max-w-full py-2">

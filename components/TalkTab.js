@@ -1,25 +1,45 @@
 'use client'
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { collection, getDocs } from 'firebase/firestore';
-import { useFirebase } from '../context/FirebaseContext';  // Adjust the import path as needed
+import { collection, getDocs, doc, updateDoc, arrayUnion, Timestamp } from 'firebase/firestore';
+import { useFirebase } from '../context/FirebaseContext';
+import { useIsLoggedIn } from '@dynamic-labs/sdk-react-core';
+import SimpleMDE from 'react-simplemde-editor';
+import TimelineItem from './TimelineItem';
+import TimelineComments from './TimelineComments';
+import DraftRow from './DraftRow';
+import { getButtonLabel, getButtonClass } from './utils';
 
 export default function TalkTab({ switchToEditTab }) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isError, setIsError] = useState(false);
   const { db } = useFirebase();
   const [draftData, setDraftData] = useState([]);
   const [selectedDraft, setSelectedDraft] = useState(null);
   const [rowCount, setRowCount] = useState(0);
+  const [comment, setComment] = useState('');
+
+  const isLoggedIn = useIsLoggedIn();
+
+  const name = "Alex Gregarov"
+  const commentName = "Kevin"
+
+  const getIcon = (name) => {
+    if (!name || typeof name !== 'string') return '';
+    return name.charAt(0).toUpperCase();
+  };
 
   useEffect(() => {
     const fetchDraftData = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, 'drafts'));
         const drafts = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-        })).filter(draft => draft.title && draft.description);  // Filter out drafts without title or description  
+          id: doc.id,
+          ...doc.data(),
+        })).filter(draft => draft.title && draft.description);
         setDraftData(drafts);
-        setRowCount(drafts.length); // Update the row count
+        setRowCount(drafts.length);
       } catch (error) {
         console.error("Error fetching draft data: ", error);
       }
@@ -30,36 +50,60 @@ export default function TalkTab({ switchToEditTab }) {
 
   const selectedDraftData = draftData.find((draft) => draft.title === selectedDraft);
 
+  const handleComment = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setIsSuccess(false);
+    setIsError(false);
+
+    const draftRef = doc(db, 'drafts', selectedDraftData.id);
+
+    const newComment = {
+      createdAt: Timestamp.now(),
+      explanation: comment,
+    };
+
+    try {
+      await updateDoc(draftRef, {
+        comments: arrayUnion(newComment),
+      });
+      setIsSuccess(true);
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return (
     <div>
-      {/* <!-- Login Alert --> */}
-      <div className="bg-yellow-50 border border-yellow-200 text-sm text-yellow-800 rounded-lg p-4 dark:bg-yellow-800/10 dark:border-yellow-900 dark:text-yellow-500" role="alert">
-        <div className="flex">
-          <div className="flex-shrink-0">
-            <svg className="flex-shrink-0 size-4 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
-              <path d="M12 9v4"></path>
-              <path d="M12 17h.01"></path>
-            </svg>
-          </div>
-          <div className="ms-4">
-            <h3 className="text-sm text-red-700 font-semibold">
-              You are not logged in.
-            </h3>
-            <div className="mt-1 text-sm text-black">
-              Your IP address will be publicly visible if you make any edits. If you <Link className='text-sm text-semibold' href={"#"}>log in</Link> or <Link className='text-sm text-semibold' href={"#"}>create an account</Link>, your edits will be attributed to a username, among other <Link className='text-sm' href={"#"}>benefits</Link>.
+      {!isLoggedIn && (
+        <div className="bg-yellow-50 border border-yellow-200 text-sm text-yellow-800 rounded-lg p-4 dark:bg-yellow-800/10 dark:border-yellow-900 dark:text-yellow-500" role="alert">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="flex-shrink-0 size-4 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+                <path d="M12 9v4"></path>
+                <path d="M12 17h.01"></path>
+              </svg>
+            </div>
+            <div className="ms-4">
+              <h3 className="text-sm text-red-700 font-semibold">
+                You are not logged in.
+              </h3>
+              <div className="mt-1 text-sm text-black">
+                Your IP address will be publicly visible if you make any edits. If you <Link className='text-sm text-semibold' href={"#"}>log in</Link> or <Link className='text-sm text-semibold' href={"#"}>create an account</Link>, your edits will be attributed to a username, among other <Link className='text-sm' href={"#"}>benefits</Link>.
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      {/* <!-- Table Section --> */}
+      )}
       <div className="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
-        {/* <!-- Card --> */}
         <div className="flex flex-col">
           <div className="-m-1.5 overflow-x-auto">
             <div className="p-1.5 min-w-full inline-block align-middle">
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden dark:bg-neutral-900 dark:border-neutral-700">
-                {/* Header */}
                 <div className="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200 dark:border-neutral-700">
                   {selectedDraft ? (
                     <>
@@ -72,8 +116,7 @@ export default function TalkTab({ switchToEditTab }) {
                         <p className="text-sm text-gray-600 dark:text-neutral-400">Create drafts, discuss, edit and more.</p>
                       </div>
                       <div>
-                        <div className="inline-flex gap-x-2">                        
-                          {/* Filter Button */}
+                        <div className="inline-flex gap-x-2">
                           <div className="hs-dropdown [--placement:bottom-right] relative inline-block" data-hs-dropdown-auto-close="inside">
                             <button id="hs-as-table-table-filter-dropdown" type="button" className="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800">
                               <svg className="flex-shrink-0 size-3.5 text-gray-800 dark:text-neutral-200" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -115,24 +158,26 @@ export default function TalkTab({ switchToEditTab }) {
                     </>
                   )}
                 </div>
-                {/* End Header */}
                 {selectedDraft ? (
                 <div className="px-6 py-4">
-                  <div className="border rounded-lg shadow-sm bg-white dark:bg-neutral-900 dark:border-neutral-700">
-                    <div className="bg-gray-100 dark:bg-neutral-800 p-2 rounded-t-lg">
-                      <strong className="block text-sm font-medium text-gray-600 dark:text-neutral-400">Description:</strong>
+                  <TimelineItem date={selectedDraftData.createdAt?.toDate().toLocaleDateString()} icon={getIcon(selectedDraftData?.address)} name={selectedDraftData?.address} explanation={selectedDraftData.explanation} />
+                  {selectedDraftData.comments?.map((comment, index) => (
+                    <TimelineComments key={index} date={comment.createdAt?.toDate().toLocaleDateString()} icon={getIcon(commentName)} name={commentName} explanation={comment.explanation} />))
+                  }
+                  <form onSubmit={handleComment} className="border rounded-lg shadow-sm bg-white dark:bg-neutral-900 dark:border-neutral-700">
+                    <div htmlFor="comment-label" className="bg-gray-100 dark:bg-neutral-800 p-2 rounded-t-lg">
+                      <strong className="block text-sm text-gray-600 dark:text-neutral-400">Add a comment:</strong>
                     </div>
                     <div className="p-4 border-b dark:border-neutral-700">
-                      <p className="text-md text-gray-800 dark:text-neutral-200">{selectedDraftData.description}</p>
+                      <SimpleMDE value={comment} onChange={setComment} placeholder='Add your comment here...' />
                     </div>
-                    <div className="bg-gray-100 dark:bg-neutral-800 p-2 rounded-b-lg">
-                      <strong className="block text-sm font-medium text-gray-600 dark:text-neutral-400">Explanation:</strong>
+                    <div className='grid relative mt-3.5'>
+                      <button type="submit" className={`mt-4 px-4 py-2 text-white rounded ${getButtonClass(isLoading, isSuccess, isError)}`} disabled={isLoading}>
+                        {getButtonLabel(isLoading, isSuccess, isError)}
+                      </button>
                     </div>
-                    <div className="p-4">
-                      <p className="text-md text-gray-800 dark:text-neutral-200">{selectedDraftData.explanation}</p>
-                    </div>
-                  </div>
-                </div>                
+                  </form>
+                </div>
                 ) : (
                   <table className="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
                     <thead className="bg-gray-50 dark:bg-neutral-800">
@@ -174,99 +219,43 @@ export default function TalkTab({ switchToEditTab }) {
                     </tbody>
                   </table>
                 )}
-                {/* Footer Section */}
                 {selectedDraft ? (
-                    <>
-                <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
-                  <div>
-                    <div class="inline-flex gap-x-2">
-                      <button onClick={() => setSelectedDraft(null)} type="button" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800">
-                        <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-                        Back
-                      </button>
+                  <div className="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
+                    <div>
+                      <div className="inline-flex gap-x-2">
+                        <button onClick={() => setSelectedDraft(null)} type="button" className="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800">
+                          <svg className="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                          Back
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-                    </>
-                  ) : (
-                    <>
-                <div class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
-                  <div>
-                    <p class="text-sm text-gray-600 dark:text-neutral-400">
-                      <span class="font-semibold text-gray-800 dark:text-neutral-200">{rowCount}</span> results
-                    </p>
-                  </div>
-                  <div>
-                    <div class="inline-flex gap-x-2">
-                      <button type="button" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800">
-                        <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-                        Prev
-                      </button>
-                      <button type="button" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800">
-                        Next
-                        <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-                      </button>
+                ) : (
+                  <div className="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-neutral-400">
+                        <span className="font-semibold text-gray-800 dark:text-neutral-200">{rowCount}</span> results
+                      </p>
+                    </div>
+                    <div>
+                      <div className="inline-flex gap-x-2">
+                        <button type="button" className="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800">
+                          <svg className="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                          Prev
+                        </button>
+                        <button type="button" className="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800">
+                          Next
+                          <svg className="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-                    </>
-                    )}
-                {/* End Footer Section */}
+                )}
               </div>
             </div>
           </div>
         </div>
-        {/* End Card */}
       </div>
-      {/* End Table Section */}
     </div>
-  );
-}
-
-function DraftRow({ draftTitle, description, level, onClick }) {
-  return (
-    <tr className="bg-white hover:bg-gray-50 dark:bg-neutral-900 dark:hover:bg-neutral-800" onClick={onClick}>
-      <td className="size-px whitespace-nowrap">
-        <a className="block relative z-10" href="#">
-          <div className="px-6 py-2">
-            <div className="block text-sm text-blue-600 decoration-2 hover:underline dark:text-blue-500">{draftTitle}</div>
-          </div>
-        </a>
-      </td>
-      <td className="h-px w-72 min-w-72">
-        <a className="block relative z-10" href="#">
-          <div className="px-6 py-2">
-            <p className="text-sm text-gray-500 dark:text-neutral-500">{description}</p>
-          </div>
-        </a>
-      </td>
-      <td className="size-px whitespace-nowrap">
-        <a className="block relative z-10" href="#">
-          <div className="px-6 py-2">
-            <span className="inline-flex items-center gap-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-800 dark:bg-neutral-900 dark:text-neutral-200">{level}</span>
-          </div>
-        </a>
-      </td>
-      <td className="size-px whitespace-nowrap">
-        <div className="px-6 py-2">
-          <div className="hs-dropdown [--placement:bottom-right] relative inline-block">
-            <button id="hs-table-dropdown-1" type="button" className="hs-dropdown-toggle py-1.5 px-2 inline-flex justify-center items-center gap-2 rounded-lg text-gray-700 align-middle disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-blue-600 transition-all text-sm dark:text-neutral-400 dark:hover:text-white dark:focus:ring-offset-gray-800">
-              <svg className="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-            </button>
-            <div className="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden divide-y divide-gray-200 min-w-40 z-20 bg-white shadow-2xl rounded-lg p-2 mt-2 dark:divide-neutral-700 dark:bg-neutral-800 dark:border dark:border-neutral-700" aria-labelledby="hs-table-dropdown-1">
-              <div className="py-2 first:pt-0 last:pb-0">
-                <span className="block py-2 px-3 text-xs font-medium uppercase text-gray-400 dark:text-neutral-600">Actions</span>
-                <a className="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300" href="#">Rename team</a>
-                <a className="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300" href="#">Add to favorites</a>
-                <a className="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300" href="#">Archive team</a>
-              </div>
-              <div className="py-2 first:pt-0 last:pb-0">
-                <a className="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-red-600 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 dark:text-red-500 dark:hover:bg-neutral-700 dark:hover:text-neutral-300" href="#">Delete</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </td>
-    </tr>
   );
 }
