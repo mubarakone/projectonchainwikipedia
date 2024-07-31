@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Login from './Login'
 
 export default function Header() {
   return (
@@ -22,13 +23,12 @@ export default function Header() {
           <button id="search-btn" className="border-none border-l border-gray-300 h-full w-[6vw] font-bold cursor-pointer">Search</button>
         </div>
       </div>
-      <div className="flex items-center justify-center mx-3">
-        <div className="flex items-center justify-center">
-          <Link href="https://en.wikipedia.org/w/index.php?title=Special:CreateAccount&returnto=Main+Page">Create account</Link>
-          <Link href="https://en.wikipedia.org/w/index.php?returnto=Main+Page&title=Special:UserLogin&centralAuthAutologinTried=1&centralAuthError=Not+centrally+logged+in">Log in</Link>
+      <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center gap-3">
+          <Login />
           <a href="#">
             <img id="three-dots" className="h-full w-[1.5vw]" src="/images/Three Dots.jpg" alt="Three Dots" />
-          </a>
+          </a> 
         </div>
       </div>
     </header>
