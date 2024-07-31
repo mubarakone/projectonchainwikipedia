@@ -9,9 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@dynamic-labs/ethereum": "^2.3.6",
+    "@dynamic-labs/ethereum-aa": "^2.3.6",
+    "@dynamic-labs/sdk-react-core": "^2.3.6",
+    "@dynamic-labs/wagmi-connector": "^2.3.6",
     "@google-cloud/firestore": "^7.9.0",
     "@google-cloud/storage": "^7.11.2",
     "@tailwindcss/typography": "^0.5.13",
+    "@tanstack/react-query": "^5.50.1",
     "dompurify": "^3.1.5",
     "firebase": "^10.12.2",
     "gray-matter": "^4.0.3",
@@ -24,7 +29,9 @@
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.0",
     "remark-html": "^16.0.1",
-    "simplemde": "^1.11.2"
+    "simplemde": "^1.11.2",
+    "viem": "^2.7.6",
+    "wagmi": "^2.8.8"
   },
   "devDependencies": {
     "postcss": "^8",
