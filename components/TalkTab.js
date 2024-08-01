@@ -5,6 +5,7 @@ import { collection, getDocs, doc, updateDoc, arrayUnion, Timestamp } from 'fire
 import { useFirebase } from '../context/FirebaseContext';
 import { useIsLoggedIn } from '@dynamic-labs/sdk-react-core';
 import SimpleMDE from 'react-simplemde-editor';
+import "easymde/dist/easymde.min.css";
 import TimelineItem from './TimelineItem';
 import TimelineComments from './TimelineComments';
 import DraftRow from './DraftRow';
